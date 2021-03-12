@@ -8,5 +8,8 @@ pkgs.mkShell {
     (pkgs.agda.withPackages(ps: [
       ps.standard-library
     ]))
+    (pkgs.ghc.withPackages(ps: [
+      ps.random
+    ]))
   ];
 }

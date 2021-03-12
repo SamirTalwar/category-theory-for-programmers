@@ -1,0 +1,18 @@
+digraph {
+  void -> void [taillabel = "id[void]", labelfontsize=8]
+  unit -> unit [taillabel = "id[unit]", labelfontsize=8]
+  false -> false [taillabel = "id[false]", labelfontsize=8]
+  true -> true [taillabel = "id[true]", labelfontsize=8]
+
+  void -> unit [taillabel = "absurd[unit]", labelfontsize=8]
+  void -> false [taillabel = "absurd[false]", labelfontsize=8]
+  void -> true [taillabel = "absurd[true]", labelfontsize=8]
+
+  unit -> false [taillabel = "unit[false]", labelfontsize=8]
+  unit -> true [taillabel = "unit[true]", labelfontsize=8]
+
+  false -> unit [taillabel = "discard[false]", labelfontsize=8]
+  false -> true [taillabel = "not[false]", labelfontsize=8]
+  true -> unit [taillabel = "discard[true]", labelfontsize=8]
+  true -> false [taillabel = "not[true]", labelfontsize=8]
+}
