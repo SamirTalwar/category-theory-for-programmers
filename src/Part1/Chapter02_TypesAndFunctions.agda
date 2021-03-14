@@ -1,4 +1,4 @@
-module part1.Chapter02_TypesAndFunctions where
+module Part1.Chapter02_TypesAndFunctions where
 
 open import Axiom.Extensionality.Propositional
 open import Data.Sum

@@ -1,4 +1,4 @@
-module part1.Chapter01_Category where
+module Part1.Chapter01_Category where
 
 open import Level
 
