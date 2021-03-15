@@ -6,9 +6,12 @@ module Empty where
   open import Data.Empty
   open import Relation.Binary
 
-  ∅ : ∀ {_≈_ : Rel ⊥ _} → Category ⊥ (λ _ _ → ⊥) _≈_
+  ∅ : Category
   ∅ = record
-        { id = λ { {()} }
+        { Object = ⊥
+        ; _⇒_ = λ _ _ → ⊥
+        ; _≈_ = λ { {()} }
+        ; id = λ { {()} }
         ; _∘_ = λ{ () }
         ; law-identityˡ = λ{ () }
         ; law-identityʳ = λ{ () }
@@ -30,9 +33,12 @@ module Free where
       -- free
       x-x : Edge x x
 
-    category : Category Node Edge _≡_
+    category : Category
     category = record
-                 { id = λ{ {x} → x-x }
+                 { Object = Node
+                 ; _⇒_ = Edge
+                 ; _≈_ = _≡_
+                 ; id = λ{ {x} → x-x }
                  ; _∘_ = λ{ x-x x-x → x-x }
                  ; law-identityˡ = λ{ x-x → refl }
                  ; law-identityʳ = λ{ x-x → refl }
@@ -50,9 +56,12 @@ module Free where
       x-x : Edge x x
       y-y : Edge y y
 
-    category : Category Node Edge _≡_
+    category : Category
     category = record
-                 { id = λ{ {x} → x-x ; {y} → y-y }
+                 { Object = Node
+                 ; _⇒_ = Edge
+                 ; _≈_ = _≡_
+                 ; id = λ{ {x} → x-x ; {y} → y-y }
                  ; _∘_ = λ{ a x-x → a ; y-y b → b }
                  ; law-identityˡ = λ{ x-y → refl ; x-x → refl ; y-y → refl }
                  ; law-identityʳ = λ{ x-y → refl ; x-x → refl ; y-y → refl }
@@ -98,9 +107,12 @@ module Bool where
     true∨ : (x : Bool) → Or x true
     false∨ : (x : Bool) → Or x x
 
-  ∧-category : Category Bool And _≡_
+  ∧-category : Category
   ∧-category = record
-                 { id = λ{ {x} → true∧ x }
+                 { Object = Bool
+                 ; _⇒_ = And
+                 ; _≈_ = _≡_
+                 ; id = λ{ {x} → true∧ x }
                  ; _∘_ = λ{ g (true∧ _) → g
                           ; (true∧ false) (false∧ true) → false∧ true
                           ; (false∧ false) (false∧ true) → false∧ true
@@ -119,9 +131,12 @@ module Bool where
                                       }
                  }
 
-  ∨-category : Category Bool Or _≡_
+  ∨-category : Category
   ∨-category = record
-                 { id = λ{ {x} → false∨ x }
+                 { Object = Bool
+                 ; _⇒_ = Or
+                 ; _≈_ = _≡_
+                 ; id = λ{ {x} → false∨ x }
                  ; _∘_ = λ{ (true∨ true) (true∨ true) → true∨ true
                           ; (false∨ true) (true∨ true) → true∨ true
                           ; (true∨ true) (true∨ false) → true∨ false
@@ -168,9 +183,12 @@ module Addition where
     2+1 : AddMod3 n2 n0
     2+2 : AddMod3 n2 n1
 
-  addMod3-category : Category ℕ AddMod3 _≡_
+  addMod3-category : Category
   addMod3-category = record
-                       { id = λ{ {n0} → 0+0 ; {n1} → 1+0 ; {n2} → 2+0 }
+                       { Object = ℕ
+                       ; _⇒_ = AddMod3
+                       ; _≈_ = _≡_
+                       ; id = λ{ {n0} → 0+0 ; {n1} → 1+0 ; {n2} → 2+0 }
                        ; _∘_ = λ{ 0+0 0+0 → 0+0
                                 ; 0+1 0+0 → 0+1
                                 ; 0+2 0+0 → 0+2

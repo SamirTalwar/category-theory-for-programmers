@@ -24,9 +24,12 @@ module PartialFunctions where
     → (A → Optional C)
   b <=< a = a >=> b
 
-  category : Extensionality _ _ → Category Set (λ A B → A → Optional B) _≡_
+  category : Extensionality _ _ → Category
   category ext = record
-                   { id = id
+                   { Object = Set
+                   ; _⇒_ = λ A B → A → Optional B
+                   ; _≈_ = _≡_
+                   ; id = id
                    ; _∘_ = _<=<_
                    ; law-identityˡ = λ{ f → ext (law-identityˡ f) }
                    ; law-identityʳ = λ{ f → ext (law-identityʳ f) }

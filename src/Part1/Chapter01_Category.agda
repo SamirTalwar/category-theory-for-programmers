@@ -3,11 +3,12 @@ module Part1.Chapter01_Category where
 open import Level
 
 record Category {α β : Level}
-    (Object : Set α)
-    (_⇒_ : Object → Object → Set β)
-    (_≈_ : {A B : Object} → (A ⇒ B) → (A ⇒ B) → Set β)
-  : Set (α ⊔ β) where
+  : Set (suc α ⊔ suc β) where
   field
+    Object : Set α
+    _⇒_ : Object → Object → Set β
+    _≈_ : {A B : Object} → (A ⇒ B) → (A ⇒ B) → Set β
+
     id : ∀ {A : Object} → A ⇒ A
     _∘_ : ∀ {A B C : Object} → (B ⇒ C) → (A ⇒ B) → (A ⇒ C)
 
@@ -30,10 +31,14 @@ module Function where
   _∘_ : ∀ {ℓ} {A B C : Set ℓ} → (B → C) → (A → B) → (A → C)
   (g ∘ f) x = g (f x)
 
-  functions-form-a-category : ∀ {ℓ} → Category (Set ℓ) (λ A B → A → B) (_≡_)
-  functions-form-a-category =
+  functions-form-a-category : ∀ {ℓ} → Category
+  functions-form-a-category {ℓ} =
     record
-      { id = id
+      { Object = Set ℓ
+      ; _⇒_ = λ A B → A → B
+      ; _≈_ = _≡_
+
+      ; id = id
       ; _∘_ = _∘_
       ; law-identityˡ = λ f → refl
       ; law-identityʳ = λ f → refl
