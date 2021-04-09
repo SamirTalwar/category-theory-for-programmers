@@ -4,6 +4,10 @@ open import Level
 
 record Category {α β : Level}
   : Set (suc α ⊔ suc β) where
+  infix 10 _⇒_
+  infixr 9 _∘_
+  infix 4 _≈_
+
   field
     Object : Set α
     _⇒_ : Object → Object → Set β
@@ -31,8 +35,8 @@ module Function where
   _∘_ : ∀ {ℓ} {A B C : Set ℓ} → (B → C) → (A → B) → (A → C)
   (g ∘ f) x = g (f x)
 
-  functions-form-a-category : ∀ {ℓ} → Category
-  functions-form-a-category {ℓ} =
+  category : ∀ {ℓ} → Category
+  category {ℓ} =
     record
       { Object = Set ℓ
       ; _⇒_ = λ A B → A → B
