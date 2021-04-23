@@ -35,7 +35,7 @@ module Function where
   _∘_ : ∀ {ℓ} {A B C : Set ℓ} → (B → C) → (A → B) → (A → C)
   (g ∘ f) x = g (f x)
 
-  category : ∀ {ℓ} → Category
+  category : ∀ {ℓ} → Category {suc ℓ} {ℓ}
   category {ℓ} =
     record
       { Object = Set ℓ
