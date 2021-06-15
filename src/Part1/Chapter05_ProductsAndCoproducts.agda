@@ -110,24 +110,26 @@ module TerminalObject where
 module Product where
   open import Data.Product
 
-  record Product {α β} (category : Category {α} {β}) (C A B : category .Category.Object) : Set (α ⊔ β) where
+  record Product {α β} (category : Category {α} {β}) (A B : category .Category.Object) : Set (α ⊔ β) where
     field
-      fst : let open Category category in C ⇒ A
-      snd : let open Category category in C ⇒ B
+      product : let open Category category in Object
+      fst : let open Category category in product ⇒ A
+      snd : let open Category category in product ⇒ B
 
-  function-product : ∀ {A B : Set} → Product Part1.Chapter01_Category.Function.category (A × B) A B
-  function-product = record { fst = proj₁ ; snd = proj₂ }
+  function-product : ∀ {A B : Set} → Product Part1.Chapter01_Category.Function.category A B
+  function-product {A} {B} = record { product = A × B ; fst = proj₁ ; snd = proj₂ }
 
 module Coproduct where
   open import Data.Sum
 
-  record Coproduct {α β} (category : Category {α} {β}) (C A B : category .Category.Object) : Set (α ⊔ β) where
+  record Coproduct {α β} (category : Category {α} {β}) (A B : category .Category.Object) : Set (α ⊔ β) where
     field
-      left : let open Category category in A ⇒ C
-      right : let open Category category in B ⇒ C
+      coproduct : let open Category category in Object
+      left : let open Category category in A ⇒ coproduct
+      right : let open Category category in B ⇒ coproduct
 
-  function-coproduct : ∀ {A B : Set} → Coproduct Part1.Chapter01_Category.Function.category (A ⊎ B) A B
-  function-coproduct = record { left = inj₁ ; right = inj₂ }
+  function-coproduct : ∀ {A B : Set} → Coproduct Part1.Chapter01_Category.Function.category A B
+  function-coproduct {A} {B} = record { coproduct = A ⊎ B ; left = inj₁ ; right = inj₂ }
 
 module ≤-Poset where
   open import Data.Nat
@@ -184,8 +186,8 @@ module ≤-Poset where
   initial : InitialObject category
   initial = record { initial = 0 ; is-initial = z≤n ; has-unique-morphisms = λ{ z≤n z≤n → refl } }
 
-  product : ∀ {m n : ℕ} (m≤n : m ≤ n) → Product category m m n
-  product m≤n = let open Category category in record { fst = id ; snd = m≤n }
+  product : ∀ {m n : ℕ} (m≤n : m ≤ n) → Product category m n
+  product {m} m≤n = let open Category category in record { product = m ; fst = id ; snd = m≤n }
 
-  coproduct : ∀ {m n : ℕ} (m≤n : m ≤ n) → Coproduct category n m n
-  coproduct m≤n = let open Category category in record { left = m≤n ; right = id }
+  coproduct : ∀ {m n : ℕ} (m≤n : m ≤ n) → Coproduct category m n
+  coproduct {n = n} m≤n = let open Category category in record { coproduct = n ; left = m≤n ; right = id }
