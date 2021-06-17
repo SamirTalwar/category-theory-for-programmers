@@ -2,8 +2,7 @@ module Part1.Chapter01_Category where
 
 open import Level
 
-record Category {α β : Level}
-  : Set (suc α ⊔ suc β) where
+record Category {α β : Level} : Set (suc α ⊔ suc β) where
   infix 10 _⇒_
   infixr 9 _∘_
   infix 4 _≈_

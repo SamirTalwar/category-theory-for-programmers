@@ -93,14 +93,20 @@ module Const where
   open import Axiom.Extensionality.Propositional
   open Part1.Chapter01_Category.Function
 
-  data Const {ℓ} (C : Set ℓ) (A : Set ℓ) : Set ℓ where
+  data Const {ℓ} (C A : Set ℓ) : Set ℓ where
     const : C → Const C A
+
+  un-const : ∀ {ℓ} {C A : Set ℓ} → Const C A → C
+  un-const (const c) = c
+
+  map : ∀ {ℓ} {C A B : Set ℓ} → (A → B) → Const C A → Const C B
+  map _ (const c) = const c
 
   functor : ∀ {ℓ} → Extensionality _ _ → (C : Set ℓ) → Endofunctor (Function.category {ℓ})
   functor ext C =
     record
       { construct = Const C
-      ; map = λ{ _ (const c) → const c }
+      ; map = map
       ; map-id = ext λ{ (const _) → refl }
       ; composes = ext λ{ (const _) → refl }
       }
