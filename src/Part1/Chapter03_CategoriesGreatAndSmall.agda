@@ -13,6 +13,7 @@ module Empty where
         { Object = ⊥
         ; _⇒_ = λ _ _ → ⊥
         ; _≈_ = λ { {()} }
+        ; isEquivalence = record { refl = λ{ {()} } ; sym = λ{ {()} } ; trans = λ{ {()} } }
         ; id = λ { {()} }
         ; _∘_ = λ{ () }
         ; law-identityˡ = λ{ () }
@@ -40,6 +41,7 @@ module Free where
                  { Object = Node
                  ; _⇒_ = Edge
                  ; _≈_ = _≡_
+                 ; isEquivalence = isEquivalence
                  ; id = λ{ {x} → x-x }
                  ; _∘_ = λ{ x-x x-x → x-x }
                  ; law-identityˡ = λ{ x-x → refl }
@@ -63,6 +65,7 @@ module Free where
                  { Object = Node
                  ; _⇒_ = Edge
                  ; _≈_ = _≡_
+                 ; isEquivalence = isEquivalence
                  ; id = λ{ {x} → x-x ; {y} → y-y }
                  ; _∘_ = λ{ a x-x → a ; y-y b → b }
                  ; law-identityˡ = λ{ x-y → refl ; x-x → refl ; y-y → refl }
@@ -114,6 +117,7 @@ module Bool where
                  { Object = Bool
                  ; _⇒_ = And
                  ; _≈_ = _≡_
+                 ; isEquivalence = isEquivalence
                  ; id = λ{ {x} → true∧ x }
                  ; _∘_ = λ{ g (true∧ _) → g
                           ; (true∧ false) (false∧ true) → false∧ true
@@ -138,6 +142,7 @@ module Bool where
                  { Object = Bool
                  ; _⇒_ = Or
                  ; _≈_ = _≡_
+                 ; isEquivalence = isEquivalence
                  ; id = λ{ {x} → false∨ x }
                  ; _∘_ = λ{ (true∨ true) (true∨ true) → true∨ true
                           ; (false∨ true) (true∨ true) → true∨ true
@@ -190,6 +195,7 @@ module Addition where
                        { Object = ℕ
                        ; _⇒_ = AddMod3
                        ; _≈_ = _≡_
+                       ; isEquivalence = isEquivalence
                        ; id = λ{ {n0} → 0+0 ; {n1} → 1+0 ; {n2} → 2+0 }
                        ; _∘_ = λ{ 0+0 0+0 → 0+0
                                 ; 0+1 0+0 → 0+1

@@ -3,7 +3,8 @@ module Part1.Chapter08_Functoriality where
 open import Data.Product
 open import Function
 open import Level
-open import Relation.Binary.Definitions using (Symmetric)
+open import Relation.Binary.Definitions
+open import Relation.Binary.Structures
 open import Relation.Binary.PropositionalEquality hiding (Extensionality)
 
 open import Part1.Chapter01_Category
@@ -17,6 +18,12 @@ C ×ᶜ D =
     { Object = Category.Object C × Category.Object D
     ; _⇒_ = λ{ (x₁ , y₁) (x₂ , y₂) → Category._⇒_ C x₁ x₂ × Category._⇒_ D y₁ y₂ }
     ; _≈_ = λ{ (x₁ , y₁) (x₂ , y₂) → Category._≈_ C x₁ x₂ × Category._≈_ D y₁ y₂ }
+    ; isEquivalence =
+        record
+          { refl = Category.refl C , Category.refl D
+          ; sym = λ{ (x , y) → Category.sym C x , (Category.sym D) y }
+          ; trans = λ{ (x₁ , x₂) (y₁ , y₂) → Category.trans C x₁ y₁ , Category.trans D x₂ y₂ }
+          }
     ; id = Category.id C , Category.id D
     ; _∘_ = λ{ (g₁ , g₂) (f₁ , f₂) → Category._∘_ C g₁ f₁ , Category._∘_ D g₂ f₂ }
     ; law-identityˡ = λ{ (f₁ , f₂) → Category.law-identityˡ C f₁ , Category.law-identityˡ D f₂ }
@@ -53,11 +60,8 @@ module Bifunctor {α β} {C D E : Category α β} where
 Bifunctor : ∀ {α β} (C D E : Category α β) → Set (α ⊔ β)
 Bifunctor C D E = Bifunctor.Bifunctor {C = C} {D = D} {E = E}
 
-Profunctor : ∀ {ℓ}
-  → (C D : Category (suc ℓ) ℓ)
-  → let open Category C in (∀ {A B : Object} → Symmetric {A = A ⇒ B} _≈_)
-  → Set _
-Profunctor {ℓ} C D sym = Bifunctor (Opposite.opposite C sym) D (Function.category ℓ)
+Profunctor : ∀ {ℓ} → (C D : Category (suc ℓ) ℓ) → Set _
+Profunctor {ℓ} C D = Bifunctor (Opposite.opposite C) D (Function.category ℓ)
 
 module Pair where
   record Pair {ℓ} (A B : Set ℓ) : Set ℓ where
@@ -177,7 +181,7 @@ module Functions where
   dimap : ∀ {ℓ} {A B C D : Set ℓ} → (C → A) → (B → D) → (A → B) → (C → D)
   dimap f g func = g ∘ func ∘ f
 
-  profunctor : ∀ {ℓ} → Profunctor (Function.category ℓ) (Function.category ℓ) sym
+  profunctor : ∀ {ℓ} → Profunctor (Function.category ℓ) (Function.category ℓ)
   profunctor =
     record
       { construct = λ{ (A , B) → A → B }

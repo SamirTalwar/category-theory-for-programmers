@@ -11,9 +11,9 @@ record Functor {α β} (C D : Category α β) : Set (α ⊔ β) where
     map : ∀ {A B : Category.Object C} → Category._⇒_ C A B → Category._⇒_ D (construct A) (construct B)
 
     map-id : ∀ {a : Category.Object C}
-      → map (Category.id C {a}) ≡ Category.id D {construct a}
+      → let open Category D in map (Category.id C {a}) ≈ id {construct a}
     composes : ∀ {a b c : Category.Object C} {g : Category._⇒_ C b c} {f : Category._⇒_ C a b}
-      → map (Category._∘_ C g f) ≡ Category._∘_ D (map g) (map f)
+      → let open Category D in map (Category._∘_ C g f) ≈ map g ∘ map f
 
 infix 4 _-F->_
 _-F->_ : ∀ {α β} (C D : Category α β) → Set (α ⊔ β)

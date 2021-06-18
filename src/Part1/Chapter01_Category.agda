@@ -1,6 +1,9 @@
 module Part1.Chapter01_Category where
 
 open import Level
+open import Relation.Binary.Bundles
+open import Relation.Binary.Definitions
+open import Relation.Binary.Structures
 
 record Category (α β : Level) : Set (suc α ⊔ suc β) where
   infix 10 _⇒_
@@ -10,7 +13,8 @@ record Category (α β : Level) : Set (suc α ⊔ suc β) where
   field
     Object : Set α
     _⇒_ : Object → Object → Set β
-    _≈_ : {A B : Object} → (A ⇒ B) → (A ⇒ B) → Set β
+    _≈_ : ∀ {A B : Object} → (A ⇒ B) → (A ⇒ B) → Set β
+    isEquivalence : ∀ {A B : Object} → IsEquivalence {A = A ⇒ B} _≈_
 
     id : ∀ {A : Object} → A ⇒ A
     _∘_ : ∀ {A B C : Object} → (B ⇒ C) → (A ⇒ B) → (A ⇒ C)
@@ -24,6 +28,15 @@ record Category (α β : Level) : Set (suc α ⊔ suc β) where
       → (g : B ⇒ C)
       → (f : A ⇒ B)
       → (h ∘ (g ∘ f)) ≈ ((h ∘ g) ∘ f)
+
+  refl : ∀ {A B : Object} → Reflexive (_≈_ {A} {B})
+  refl = IsEquivalence.refl isEquivalence
+  sym : ∀ {A B : Object} → Symmetric (_≈_ {A} {B})
+  sym = IsEquivalence.sym isEquivalence
+  trans : ∀ {A B : Object} → Transitive (_≈_ {A} {B})
+  trans = IsEquivalence.trans isEquivalence
+  setoid : ∀ {A B : Object} → Setoid _ _
+  setoid {A} {B} = record { Carrier = A ⇒ B ; _≈_ = _≈_ ; isEquivalence = isEquivalence }
 
 Category₀ = Category Level.zero Level.zero
 
@@ -42,6 +55,7 @@ module Function where
       { Object = Set ℓ
       ; _⇒_ = λ A B → A → B
       ; _≈_ = _≡_
+      ; isEquivalence = isEquivalence
 
       ; id = id
       ; _∘_ = _∘_

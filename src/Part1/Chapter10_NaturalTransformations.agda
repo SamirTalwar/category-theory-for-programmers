@@ -85,27 +85,25 @@ module NaturalTransformationExamples where
 
 functor-category : ∀ {α} {β}
   → (C D : Category α β)
-  → (let open Category D in ∀ {A B} → IsEquivalence {A = A ⇒ B} _≈_)
   → (let open Category D in ∀ {A B C D} (f : A ⇒ B → C ⇒ D) {x y : A ⇒ B} → x ≈ y → f x ≈ f y)
   → Category (α ⊔ β) (α ⊔ β)
-functor-category {α} {β} C D isEquivalence cong =
-  let
-    open Category D
-    setoid : ∀ {A B : Object} → Setoid _ _
-    setoid {A} {B} = record { Carrier = A ⇒ B ; _≈_ = _≈_ ; isEquivalence = isEquivalence }
-  in
+functor-category {α} {β} C D cong =
+  let open Category D in
   record
     { Object = C -F-> D
     ; _⇒_ = NaturalTransformation
     ; _≈_ = λ f g → Lift (α ⊔ β) (NaturalTransformation.transform-object f ≈ NaturalTransformation.transform-object g)
+    ; isEquivalence =
+        record
+          { refl = lift refl
+          ; sym = λ{ (lift x) → lift (sym x) }
+          ; trans = λ{ (lift f) (lift g) → lift (trans f g) }
+          }
     ; id = λ{ {F} →
         record
           { transform-object = id
           ; naturality-condition = λ{ {f = f} →
-              let
-                open Setoid setoid
-                open Relation.Binary.Reasoning.Setoid setoid
-              in
+              let open Relation.Binary.Reasoning.Setoid setoid in
               begin
                 Functor.map F f ∘ id
               ≈⟨ law-identityʳ (Functor.map F f) ⟩
@@ -120,10 +118,7 @@ functor-category {α} {β} C D isEquivalence cong =
         record
           { transform-object = NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f
           ; naturality-condition = λ{ {f = morphism} →
-              let
-                open Setoid setoid
-                open Relation.Binary.Reasoning.Setoid setoid
-              in
+              let open Relation.Binary.Reasoning.Setoid setoid in
               begin
                 Functor.map C morphism ∘ (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f)
               ≈⟨ law-associative (Functor.map C morphism) (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f) ⟩

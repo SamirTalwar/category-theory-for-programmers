@@ -29,6 +29,7 @@ module PartialFunctions where
                    { Object = Set
                    ; _⇒_ = λ A B → A → Optional B
                    ; _≈_ = _≡_
+                   ; isEquivalence = isEquivalence
                    ; id = id
                    ; _∘_ = _<=<_
                    ; law-identityˡ = λ{ f → ext (law-identityˡ f) }

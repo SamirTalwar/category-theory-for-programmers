@@ -22,19 +22,18 @@ module Opposite where
   open import Relation.Binary.Definitions
   open import Relation.Binary.PropositionalEquality hiding (Extensionality)
 
-  opposite : ∀ {α β} (category : Category α β)
-    → let open Category category in (∀ {A B : Object} → Symmetric {A = A ⇒ B} _≈_)
-    → Category α β
-  opposite category sym =
+  opposite : ∀ {α β} (category : Category α β) → Category α β
+  opposite category =
     record
       { Object = Object
       ; _⇒_ = λ y x → x ⇒ y
       ; _≈_ = _≈_
+      ; isEquivalence = Category.isEquivalence category
       ; id = id
       ; _∘_ = λ g f → f ∘ g
       ; law-identityˡ = law-identityʳ
       ; law-identityʳ = law-identityˡ
-      ; law-associative = λ h g f → sym (law-associative f g h)
+      ; law-associative = λ h g f → Category.sym category (law-associative f g h)
       }
       where
       open Category category
@@ -147,6 +146,7 @@ module ≤-Poset where
       { Object = ℕ
       ; _⇒_ = _≤_
       ; _≈_ = _≡_
+      ; isEquivalence = isEquivalence
       ; id = id
       ; _∘_ = _∘_
       ; law-identityˡ = law-identityˡ
