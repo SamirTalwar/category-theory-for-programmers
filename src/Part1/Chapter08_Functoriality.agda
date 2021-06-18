@@ -11,7 +11,7 @@ open import Part1.Chapter05_ProductsAndCoproducts
 open import Part1.Chapter07_Functors
 
 infix 5 _×ᶜ_
-_×ᶜ_ : ∀ {α β} → (C D : Category {α} {β}) → Category {α} {β}
+_×ᶜ_ : ∀ {α β} → (C D : Category α β) → Category α β
 C ×ᶜ D =
   record
     { Object = Category.Object C × Category.Object D
@@ -24,7 +24,7 @@ C ×ᶜ D =
     ; law-associative = λ{ (h₁ , h₂) (g₁ , g₂) (f₁ , f₂) → Category.law-associative C h₁ g₁ f₁ , Category.law-associative D h₂ g₂ f₂ }
     }
 
-module Bifunctor {α β} {C D E : Category {α} {β}} where
+module Bifunctor {α β} {C D E : Category α β} where
   Bifunctor : Set (α ⊔ β)
   Bifunctor = C ×ᶜ D -F-> E
 
@@ -50,26 +50,26 @@ module Bifunctor {α β} {C D E : Category {α} {β}} where
     → (let open Category E in Functor.construct functor (z , x) ⇒ Functor.construct functor (z , y))
   rmap functor g = bimap functor (Category.id C) g
 
-Bifunctor : ∀ {α β} (C D E : Category {α} {β}) → Set (α ⊔ β)
+Bifunctor : ∀ {α β} (C D E : Category α β) → Set (α ⊔ β)
 Bifunctor C D E = Bifunctor.Bifunctor {C = C} {D = D} {E = E}
 
 Profunctor : ∀ {ℓ}
-  → (C D : Category {suc ℓ} {ℓ})
+  → (C D : Category (suc ℓ) ℓ)
   → let open Category C in (∀ {A B : Object} → Symmetric {A = A ⇒ B} _≈_)
   → Set _
-Profunctor C D sym = Bifunctor (Opposite.opposite C sym) D Function.category
+Profunctor {ℓ} C D sym = Bifunctor (Opposite.opposite C sym) D (Function.category ℓ)
 
 module Pair where
-  record Pair (A B : Set) : Set where
+  record Pair {ℓ} (A B : Set ℓ) : Set ℓ where
     constructor pair
     field
       x : A
       y : B
 
-  bimap : ∀ {A B C D : Set} → (A → C) → (B → D) → Pair A B → Pair C D
+  bimap : ∀ {ℓ} {A B C D : Set ℓ} → (A → C) → (B → D) → Pair A B → Pair C D
   bimap f g (pair x y) = pair (f x) (g y)
 
-  bifunctor : Bifunctor Function.category Function.category Function.category
+  bifunctor : ∀ {ℓ} → Bifunctor (Function.category ℓ) (Function.category ℓ) (Function.category ℓ)
   bifunctor =
     record
       { construct = λ{ (A , B) → Pair A B }
@@ -109,11 +109,11 @@ module PreList where
     nil : PreList A B
     cons : (head : A) → (tail : B) → PreList A B
 
-  bimap : ∀ {A B C D : Set} → (A → C) → (B → D) → PreList A B → PreList C D
+  bimap : ∀ {ℓ} {A B C D : Set ℓ} → (A → C) → (B → D) → PreList A B → PreList C D
   bimap f g nil = nil
   bimap f g (cons head tail) = cons (f head) (g tail)
 
-  bifunctor : Extensionality _ _ → Bifunctor Function.category Function.category Function.category
+  bifunctor : ∀ {ℓ} → Extensionality _ _ → Bifunctor (Function.category ℓ) (Function.category ℓ) (Function.category ℓ)
   bifunctor ext =
     record
       { construct = λ{ (A , B) → PreList A B }
@@ -130,7 +130,7 @@ module K2 where
   bimap : ∀ {ℓ} {A B C D X : Set ℓ} → (A → C) → (B → D) → K2 X A B → K2 X C D
   bimap _ _ record { value = value } = record { value = value }
 
-  bifunctor : ∀ {ℓ} → Set ℓ → Bifunctor Function.category Function.category Function.category
+  bifunctor : ∀ {ℓ} → Set ℓ → Bifunctor (Function.category ℓ) (Function.category ℓ) (Function.category ℓ)
   bifunctor C =
     record
       { construct = λ{ (A , B) → K2 C A B }
@@ -147,7 +147,7 @@ module Fst where
   bimap : ∀ {ℓ} {A B C D : Set ℓ} → (A → C) → (B → D) → Fst A B → Fst C D
   bimap f _ record { value = value } = record { value = f value }
 
-  bifunctor : ∀ {ℓ} → Bifunctor (Function.category {ℓ}) (Function.category {ℓ}) (Function.category {ℓ})
+  bifunctor : ∀ {ℓ} → Bifunctor (Function.category ℓ) (Function.category ℓ) (Function.category ℓ)
   bifunctor =
     record
       { construct = λ{ (A , B) → Fst A B }
@@ -164,7 +164,7 @@ module Snd where
   bimap : ∀ {ℓ} {A B C D : Set ℓ} → (A → C) → (B → D) → Snd A B → Snd C D
   bimap _ g record { value = value } = record { value = g value }
 
-  bifunctor : ∀ {ℓ} → Bifunctor (Function.category {ℓ}) (Function.category {ℓ}) (Function.category {ℓ})
+  bifunctor : ∀ {ℓ} → Bifunctor (Function.category ℓ) (Function.category ℓ) (Function.category ℓ)
   bifunctor =
     record
       { construct = λ{ (A , B) → Snd A B }
@@ -177,7 +177,7 @@ module Functions where
   dimap : ∀ {ℓ} {A B C D : Set ℓ} → (C → A) → (B → D) → (A → B) → (C → D)
   dimap f g func = g ∘ func ∘ f
 
-  profunctor : ∀ {ℓ} → Profunctor (Function.category {ℓ}) (Function.category {ℓ}) sym
+  profunctor : ∀ {ℓ} → Profunctor (Function.category ℓ) (Function.category ℓ) sym
   profunctor =
     record
       { construct = λ{ (A , B) → A → B }

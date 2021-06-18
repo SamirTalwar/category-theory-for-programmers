@@ -9,7 +9,7 @@ open import Part1.Chapter01_Category
 open import Part1.Chapter07_Functors as Functors
 
 record NaturalTransformation {α β}
-    {C D : Category {α} {β}}
+    {C D : Category α β}
     (F G : C -F-> D)
     : Set (α ⊔ β) where
   field
@@ -55,7 +55,7 @@ module NaturalTransformationExamples where
       map-preserves-length f (x ∷ xs) = cong ℕ.suc (map-preserves-length f xs)
       naturality-condition : ∀ {A B : Set} {f : A → B}
         → (xs : List A)
-        → let open Category (Function.category {Level.zero}) in
+        → let open Category (Function.category Level.zero) in
           (Functors.Const.map f) (length-const xs) ≡ length-const (Data.List.map f xs)
       naturality-condition [] = refl
       naturality-condition {f = f} (x ∷ xs) =
@@ -84,10 +84,10 @@ module NaturalTransformationExamples where
     scam (const _) = nothing
 
 functor-category : ∀ {α} {β}
-  → (C D : Category {α} {β})
+  → (C D : Category α β)
   → (let open Category D in ∀ {A B} → IsEquivalence {A = A ⇒ B} _≈_)
   → (let open Category D in ∀ {A B C D} (f : A ⇒ B → C ⇒ D) {x y : A ⇒ B} → x ≈ y → f x ≈ f y)
-  → Category {α ⊔ β} {α ⊔ β}
+  → Category (α ⊔ β) (α ⊔ β)
 functor-category {α} {β} C D isEquivalence cong =
   let
     open Category D

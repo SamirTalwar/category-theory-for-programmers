@@ -5,7 +5,7 @@ open import Relation.Binary.PropositionalEquality hiding (Extensionality)
 
 open import Part1.Chapter01_Category
 
-record Functor {α β} (C D : Category {α} {β}) : Set (α ⊔ β) where
+record Functor {α β} (C D : Category α β) : Set (α ⊔ β) where
   field
     construct : Category.Object C → Category.Object D
     map : ∀ {A B : Category.Object C} → Category._⇒_ C A B → Category._⇒_ D (construct A) (construct B)
@@ -16,16 +16,16 @@ record Functor {α β} (C D : Category {α} {β}) : Set (α ⊔ β) where
       → map (Category._∘_ C g f) ≡ Category._∘_ D (map g) (map f)
 
 infix 4 _-F->_
-_-F->_ : ∀ {α β} (C D : Category {α} {β}) → Set (α ⊔ β)
+_-F->_ : ∀ {α β} (C D : Category α β) → Set (α ⊔ β)
 _-F->_ = Functor
 
-Endofunctor : ∀ {α β} (C : Category {α} {β}) → Set (α ⊔ β)
+Endofunctor : ∀ {α β} (C : Category α β) → Set (α ⊔ β)
 Endofunctor category = category -F-> category
 
 module Id where
   open Part1.Chapter01_Category.Function
 
-  functor : ∀ {ℓ} → Endofunctor (Function.category {ℓ})
+  functor : ∀ {ℓ} → Endofunctor (Function.category ℓ)
   functor =
     record
       { construct = id
@@ -38,7 +38,7 @@ module Maybe where
   open import Axiom.Extensionality.Propositional
   open import Data.Maybe
 
-  functor : ∀ {ℓ} → Extensionality _ _ → Endofunctor (Function.category {ℓ})
+  functor : ∀ {ℓ} → Extensionality _ _ → Endofunctor (Function.category ℓ)
   functor ext =
     record
       { construct = Maybe
@@ -61,7 +61,7 @@ module List where
   open import Data.List
   open Part1.Chapter01_Category.Function
 
-  functor : ∀ {ℓ} → Extensionality _ _ → Endofunctor (Function.category {ℓ})
+  functor : ∀ {ℓ} → Extensionality _ _ → Endofunctor (Function.category ℓ)
   functor ext =
     record
       { construct = List
@@ -80,7 +80,7 @@ module List where
 module Reader where
   open Part1.Chapter01_Category.Function
 
-  functor : ∀ {ℓ} → (A : Set ℓ) → Endofunctor (Function.category {ℓ})
+  functor : ∀ {ℓ} → (A : Set ℓ) → Endofunctor (Function.category ℓ)
   functor A =
     record
       { construct = (λ B → A → B)
@@ -102,7 +102,7 @@ module Const where
   map : ∀ {ℓ} {C A B : Set ℓ} → (A → B) → Const C A → Const C B
   map _ (const c) = const c
 
-  functor : ∀ {ℓ} → Extensionality _ _ → (C : Set ℓ) → Endofunctor (Function.category {ℓ})
+  functor : ∀ {ℓ} → Extensionality _ _ → (C : Set ℓ) → Endofunctor (Function.category ℓ)
   functor ext C =
     record
       { construct = Const C

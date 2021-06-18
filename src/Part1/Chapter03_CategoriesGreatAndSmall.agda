@@ -1,12 +1,14 @@
 module Part1.Chapter03_CategoriesGreatAndSmall where
 
+open import Level
+
 open import Part1.Chapter01_Category
 
 module Empty where
-  open import Data.Empty
+  open import Data.Empty.Polymorphic
   open import Relation.Binary
 
-  ∅ : Category
+  ∅ : ∀ {ℓ} → Category ℓ ℓ
   ∅ = record
         { Object = ⊥
         ; _⇒_ = λ _ _ → ⊥
@@ -33,7 +35,7 @@ module Free where
       -- free
       x-x : Edge x x
 
-    category : Category
+    category : Category₀
     category = record
                  { Object = Node
                  ; _⇒_ = Edge
@@ -56,7 +58,7 @@ module Free where
       x-x : Edge x x
       y-y : Edge y y
 
-    category : Category
+    category : Category₀
     category = record
                  { Object = Node
                  ; _⇒_ = Edge
@@ -107,7 +109,7 @@ module Bool where
     true∨ : (x : Bool) → Or x true
     false∨ : (x : Bool) → Or x x
 
-  ∧-category : Category
+  ∧-category : Category₀
   ∧-category = record
                  { Object = Bool
                  ; _⇒_ = And
@@ -131,7 +133,7 @@ module Bool where
                                       }
                  }
 
-  ∨-category : Category
+  ∨-category : Category₀
   ∨-category = record
                  { Object = Bool
                  ; _⇒_ = Or
@@ -183,7 +185,7 @@ module Addition where
     2+1 : AddMod3 n2 n0
     2+2 : AddMod3 n2 n1
 
-  addMod3-category : Category
+  addMod3-category : Category₀
   addMod3-category = record
                        { Object = ℕ
                        ; _⇒_ = AddMod3

@@ -19,7 +19,7 @@ open Product
 open TerminalObject
 
 record FunctionObject {α β}
-    (category : Category {α} {β})
+    (category : Category α β)
     (bifunctor : Bifunctor category category category)
     (A B : Category.Object category)
     : Set (α ⊔ β) where
@@ -34,7 +34,7 @@ record FunctionObject {α β}
     factorize : ∀ {Z : Object} → (g : Z ×× A ⇒ B) → ∃[ h ] (g ≈ eval ∘ Bifunctor.lmap bifunctor h)
 
 record CartesianClosed {α β}
-    (category : Category {α} {β})
+    (category : Category α β)
     : Set (α ⊔ β) where
   open Category category
 
@@ -45,7 +45,7 @@ record CartesianClosed {α β}
     terminal-object : TerminalObject category
 
 record BicartesianClosed {α β}
-    (category : Category {α} {β})
+    (category : Category α β)
     : Set (α ⊔ β) where
   open Category category
 
@@ -54,7 +54,7 @@ record BicartesianClosed {α β}
     coproduct : ∀ {A B : Object} → Coproduct category A B
     initial-object : InitialObject category
 
-set-is-bicartesian-closed : ∀ {ℓ} → Extensionality _ _ → BicartesianClosed (Function.category {ℓ})
+set-is-bicartesian-closed : ∀ {ℓ} → Extensionality _ _ → BicartesianClosed (Function.category ℓ)
 set-is-bicartesian-closed ext =
   record
     { cartesian-closed =

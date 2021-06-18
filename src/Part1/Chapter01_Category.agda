@@ -2,7 +2,7 @@ module Part1.Chapter01_Category where
 
 open import Level
 
-record Category {α β : Level} : Set (suc α ⊔ suc β) where
+record Category (α β : Level) : Set (suc α ⊔ suc β) where
   infix 10 _⇒_
   infixr 9 _∘_
   infix 4 _≈_
@@ -25,6 +25,8 @@ record Category {α β : Level} : Set (suc α ⊔ suc β) where
       → (f : A ⇒ B)
       → (h ∘ (g ∘ f)) ≈ ((h ∘ g) ∘ f)
 
+Category₀ = Category Level.zero Level.zero
+
 module Function where
   open import Relation.Binary.PropositionalEquality
 
@@ -34,8 +36,8 @@ module Function where
   _∘_ : ∀ {ℓ} {A B C : Set ℓ} → (B → C) → (A → B) → (A → C)
   (g ∘ f) x = g (f x)
 
-  category : ∀ {ℓ} → Category {suc ℓ} {ℓ}
-  category {ℓ} =
+  category : ∀ (ℓ : Level) → Category (suc ℓ) ℓ
+  category ℓ =
     record
       { Object = Set ℓ
       ; _⇒_ = λ A B → A → B

@@ -24,7 +24,7 @@ module PartialFunctions where
     → (A → Optional C)
   b <=< a = a >=> b
 
-  category : Extensionality _ _ → Category
+  category : Extensionality _ _ → Category _ _
   category ext = record
                    { Object = Set
                    ; _⇒_ = λ A B → A → Optional B
