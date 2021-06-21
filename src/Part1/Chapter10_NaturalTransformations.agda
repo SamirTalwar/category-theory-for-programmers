@@ -242,3 +242,49 @@ functor-setoid C D =
               }
         }
       }
+
+compose-functors : ∀ {α β} {C D E : Category α β} → D -F-> E → C -F-> D → C -F-> E
+compose-functors {_} {_} {C} {D} {E} DE CD =
+  let open Function in
+  record
+    { construct = Functor.construct DE ∘ Functor.construct CD
+    ; map = Functor.map DE ∘ Functor.map CD
+    ; map-id =
+        let
+          open Category E
+          open Relation.Binary.Reasoning.Setoid setoid
+        in
+        begin
+          Functor.map DE (Functor.map CD (Category.id C))
+        ≈⟨ Functor.preserves-equality DE (Functor.map-id CD) ⟩
+          Functor.map DE (Category.id D)
+        ≈⟨ Functor.map-id DE ⟩
+          Category.id E
+        ∎
+    ; composes = λ {_} {_} {_} {g} {f} →
+        let
+          module C = Category C
+          module D = Category D
+          module E = Category E
+          open Relation.Binary.Reasoning.Setoid E.setoid
+        in
+        begin
+          Functor.map DE (Functor.map CD (g C.∘ f))
+        ≈⟨ Functor.preserves-equality DE (Functor.composes CD) ⟩
+          Functor.map DE (Functor.map CD g D.∘ Functor.map CD f)
+        ≈⟨ Functor.composes DE ⟩
+          Functor.map DE (Functor.map CD g) E.∘ Functor.map DE (Functor.map CD f)
+        ∎
+    ; preserves-equality = λ {_} {_} {f} {g} f≡g →
+        let
+          module C = Category C
+          module D = Category D
+          module E = Category E
+          open Relation.Binary.Reasoning.Setoid E.setoid
+        in
+        begin
+          (Functor.map DE (Functor.map CD f))
+        ≈⟨ Functor.preserves-equality DE (Functor.preserves-equality CD f≡g) ⟩
+          (Functor.map DE (Functor.map CD g))
+        ∎
+    }

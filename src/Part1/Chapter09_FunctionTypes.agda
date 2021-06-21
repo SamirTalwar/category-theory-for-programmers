@@ -65,6 +65,7 @@ set-is-bicartesian-closed ext =
                 ; map = λ{ (f , g) (x , y) → f x , g y }
                 ; map-id = refl
                 ; composes = refl
+                ; preserves-equality = λ{ (f , g) → cong₂ (λ{ f g (x , y) → f x , g y }) f g }
                 }
           ; product = λ{ {A} {B} →
               record

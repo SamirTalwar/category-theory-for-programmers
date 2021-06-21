@@ -6,14 +6,20 @@ open import Relation.Binary.PropositionalEquality hiding (Extensionality)
 open import Part1.Chapter01_Category
 
 record Functor {α β} (C D : Category α β) : Set (α ⊔ β) where
-  field
-    construct : Category.Object C → Category.Object D
-    map : ∀ {a b : Category.Object C} → Category._⇒_ C a b → Category._⇒_ D (construct a) (construct b)
+  private module C = Category C
+  private module D = Category D
 
-    map-id : ∀ {a : Category.Object C}
-      → let open Category D in map (Category.id C {a}) ≈ id {construct a}
-    composes : ∀ {a b c : Category.Object C} {g : Category._⇒_ C b c} {f : Category._⇒_ C a b}
-      → let open Category D in map (Category._∘_ C g f) ≈ map g ∘ map f
+  field
+    construct : C.Object → D.Object
+    map : ∀ {a b : C.Object} → a C.⇒ b → construct a D.⇒ construct b
+
+    map-id : ∀ {a : C.Object}
+      → map (C.id {a}) D.≈ D.id {construct a}
+    composes : ∀ {a b c : C.Object} {g : b C.⇒ c} {f : a C.⇒ b}
+      → map (g C.∘ f) D.≈ map g D.∘ map f
+    preserves-equality : ∀ {a b : C.Object} {f g : a C.⇒ b}
+      → f C.≈ g
+      → map f D.≈ map g
 
 infix 4 _-F->_
 _-F->_ : ∀ {α β} (C D : Category α β) → Set (α ⊔ β)
@@ -32,6 +38,7 @@ module Id where
       ; map = λ f x → f x
       ; map-id = refl
       ; composes = refl
+      ; preserves-equality = icong
       }
 
 module Maybe where
@@ -45,6 +52,7 @@ module Maybe where
       ; map = map
       ; map-id = ext λ{ nothing → refl ; (just x) → refl }
       ; composes = ext λ{ nothing → refl ; (just x) → refl }
+      ; preserves-equality = λ{ refl → refl }
       }
 
   -- not-a-functor : ∀ {ℓ} → Extensionality _ _ → (Function.category {ℓ}) -F-> (Function.category {ℓ})
@@ -68,6 +76,7 @@ module List where
       ; map = map
       ; map-id = ext map-id
       ; composes = ext composes
+      ; preserves-equality = λ{ refl → refl }
       }
     where
     map-id : ∀ {ℓ} {A : Set ℓ} → (x : List A) → map id x ≡ x
@@ -87,6 +96,7 @@ module Reader where
       ; map = _∘_
       ; map-id = refl
       ; composes = refl
+      ; preserves-equality = λ{ refl → refl }
       }
 
 module Const where
@@ -109,4 +119,5 @@ module Const where
       ; map = map
       ; map-id = ext λ{ (const _) → refl }
       ; composes = ext λ{ (const _) → refl }
+      ; preserves-equality = λ{ refl → refl }
       }

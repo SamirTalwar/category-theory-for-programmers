@@ -85,6 +85,7 @@ module Pair where
       ; map = λ{ (f , g) → bimap f g }
       ; map-id = refl
       ; composes = refl
+      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module IsomorphicMaybe where
@@ -129,6 +130,7 @@ module PreList where
       ; map = λ{ (f , g) → bimap f g }
       ; map-id = ext λ{ nil → refl ; (cons head tail) → refl }
       ; composes = ext λ{ nil → refl ; (cons head tail) → refl }
+      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module K2 where
@@ -146,6 +148,7 @@ module K2 where
       ; map = λ{ (f , g) → bimap f g }
       ; map-id = refl
       ; composes = refl
+      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module Fst where
@@ -163,6 +166,7 @@ module Fst where
       ; map = λ{ (f , g) → bimap f g }
       ; map-id = refl
       ; composes = refl
+      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module Snd where
@@ -180,6 +184,7 @@ module Snd where
       ; map = λ{ (f , g) → bimap f g }
       ; map-id = refl
       ; composes = refl
+      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module Functions where
@@ -193,4 +198,5 @@ module Functions where
       ; map = λ{ (f , g) → dimap f g }
       ; map-id = refl
       ; composes = refl
+      ; preserves-equality = λ{ (f , g) → cong₂ dimap f g }
       }
