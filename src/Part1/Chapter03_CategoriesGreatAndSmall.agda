@@ -19,6 +19,7 @@ module Empty where
         ; law-identityˡ = λ{ () }
         ; law-identityʳ = λ{ () }
         ; law-associative = λ{ () }
+        ; _⟩∘⟨_ = λ{ {()} }
         }
 
 module Free where
@@ -47,6 +48,7 @@ module Free where
                  ; law-identityˡ = λ{ x-x → refl }
                  ; law-identityʳ = λ{ x-x → refl }
                  ; law-associative = λ{ x-x x-x x-x → refl }
+                 ; _⟩∘⟨_ = λ{ refl refl → refl }
                  }
 
   module Two where
@@ -76,6 +78,7 @@ module Free where
                                       ; y-y y-y x-y → refl
                                       ; y-y y-y y-y → refl
                                       }
+                 ; _⟩∘⟨_ = λ{ refl refl → refl }
                  }
 
 module Bool where
@@ -135,6 +138,7 @@ module Bool where
                                       ; (true∧ false) (false∧ false) (false∧ false) → refl
                                       ; (false∧ false) (false∧ false) (false∧ false) → refl
                                       }
+                 ; _⟩∘⟨_ = λ{ refl refl → refl }
                  }
 
   ∨-category : Category₀
@@ -169,6 +173,7 @@ module Bool where
                                       ; (true∨ alse) (false∨ false) (false∨ false) → refl
                                       ; (false∨ false) (false∨ false) (false∨ false) → refl
                                       }
+                 ; _⟩∘⟨_ = λ{ refl refl → refl }
                  }
 
 module Addition where
@@ -327,4 +332,5 @@ module Addition where
                                             ; 0+1 1+2 2+2 → refl
                                             ; 0+2 1+2 2+2 → refl
                                             }
+                       ; _⟩∘⟨_ = λ{ refl refl → refl }
                        }

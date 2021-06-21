@@ -32,6 +32,7 @@ module Opposite where
       ; law-identityˡ = law-identityʳ
       ; law-identityʳ = law-identityˡ
       ; law-associative = λ h g f → sym (law-associative f g h)
+      ; _⟩∘⟨_ = λ g f → f ⟩∘⟨ g
       }
 
 module InitialObject where
@@ -111,7 +112,7 @@ module Product where
       fst : let open Category category in product ⇒ A
       snd : let open Category category in product ⇒ B
 
-  function-product : ∀ {A B : Set} → Product (Part1.Chapter01_Category.Function.category _) A B
+  function-product : ∀ {A B : Set} → Product (Function.category _) A B
   function-product {A} {B} = record { product = A × B ; fst = proj₁ ; snd = proj₂ }
 
 module Coproduct where
@@ -123,7 +124,7 @@ module Coproduct where
       left : let open Category category in A ⇒ coproduct
       right : let open Category category in B ⇒ coproduct
 
-  function-coproduct : ∀ {A B : Set} → Coproduct (Part1.Chapter01_Category.Function.category _) A B
+  function-coproduct : ∀ {A B : Set} → Coproduct (Function.category _) A B
   function-coproduct {A} {B} = record { coproduct = A ⊎ B ; left = inj₁ ; right = inj₂ }
 
 module ≤-Poset where
@@ -148,6 +149,7 @@ module ≤-Poset where
       ; law-identityˡ = law-identityˡ
       ; law-identityʳ = law-identityʳ
       ; law-associative = law-associative
+      ; _⟩∘⟨_ = _⟩∘⟨_
       }
     where
     id : ∀ {n : ℕ} → n ≤ n
@@ -178,6 +180,8 @@ module ≤-Poset where
       ≡⟨⟩
         (s≤s h ∘ s≤s g) ∘ s≤s f
       ∎
+    _⟩∘⟨_ : ∀ {m n p} {g₁ g₂ : n ≤ p} {f₁ f₂ : m ≤ n} → g₁ ≡ g₂ → f₁ ≡ f₂ → g₁ ∘ f₁ ≡ g₂ ∘ f₂
+    refl ⟩∘⟨ refl = refl
 
   initial : InitialObject category
   initial = record { initial = 0 ; is-initial = z≤n ; has-unique-morphisms = λ{ z≤n z≤n → refl } }

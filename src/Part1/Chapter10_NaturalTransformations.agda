@@ -86,14 +86,8 @@ module NaturalTransformationExamples where
     scam : ∀ {A C : Set} → Const C A → Maybe A
     scam (const _) = nothing
 
-Cong : ∀ {α β} → Category α β → Set (α ⊔ β)
-Cong category = let open Category category in ∀ {a b c d : Object} (f : a ⇒ b → c ⇒ d) {x y : a ⇒ b} → x ≈ y → f x ≈ f y
-
-functor-category : ∀ {α} {β}
-  → (C D : Category α β)
-  → (cong : Cong D)
-  → Category (α ⊔ β) (α ⊔ β)
-functor-category {α} {β} C D cong =
+functor-category : ∀ {α} {β} → (C D : Category α β) → Category (α ⊔ β) (α ⊔ β)
+functor-category {α} {β} C D =
   let open Category D in
   record
     { Object = C -F-> D
@@ -129,11 +123,11 @@ functor-category {α} {β} C D cong =
                 Functor.map C morphism ∘ (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f)
               ≈⟨ law-associative (Functor.map C morphism) (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f) ⟩
                 (Functor.map C morphism ∘ NaturalTransformation.transform-object g) ∘ NaturalTransformation.transform-object f
-              ≈⟨ cong (_∘ NaturalTransformation.transform-object f) (NaturalTransformation.naturality-condition g) ⟩
+              ≈⟨ NaturalTransformation.naturality-condition g ⟩∘⟨ refl ⟩
                 (NaturalTransformation.transform-object g ∘ Functor.map B morphism) ∘ NaturalTransformation.transform-object f
               ≈⟨ sym (law-associative (NaturalTransformation.transform-object g) (Functor.map B morphism) (NaturalTransformation.transform-object f)) ⟩
                 NaturalTransformation.transform-object g ∘ (Functor.map B morphism ∘ NaturalTransformation.transform-object f)
-              ≈⟨ cong (NaturalTransformation.transform-object g ∘_) (NaturalTransformation.naturality-condition f) ⟩
+              ≈⟨ refl ⟩∘⟨ NaturalTransformation.naturality-condition f ⟩
                 NaturalTransformation.transform-object g ∘ (NaturalTransformation.transform-object f ∘ Functor.map A morphism)
               ≈⟨ law-associative (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f) (Functor.map A morphism) ⟩
                 (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f) ∘ Functor.map A morphism
@@ -143,6 +137,7 @@ functor-category {α} {β} C D cong =
     ; law-identityˡ = λ f → lift (law-identityˡ (NaturalTransformation.transform-object f))
     ; law-identityʳ = λ f → lift (law-identityʳ (NaturalTransformation.transform-object f))
     ; law-associative = λ h g f → lift (law-associative (NaturalTransformation.transform-object h) (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f))
+    ; _⟩∘⟨_ = λ g f → lift (lower g ⟩∘⟨ lower f)
     }
 
 natural-transformation-id : ∀ {α β} {C D : Category α β}
@@ -174,8 +169,8 @@ record NaturalIsomorphism {α β} {C D : Category α β} (F G : C -F-> D) : Set 
     isomorphicʳ : ∀ {x : Category.Object C} →
       let open Category D in NaturalTransformation.transform-object f {x} ∘ NaturalTransformation.transform-object g {x} ≈ id
 
-functor-setoid : ∀ {α β} → (C D : Category α β) → (cong : Cong D) → Setoid _ _
-functor-setoid C D cong =
+functor-setoid : ∀ {α β} → (C D : Category α β) → Setoid _ _
+functor-setoid C D =
   record
     { Carrier = C -F-> D
     ; _≈_ = NaturalIsomorphism
@@ -198,8 +193,8 @@ functor-setoid C D cong =
               }
         ; trans = λ isoA isoB →
             record
-              { f = Category._∘_ (functor-category C D cong) (NaturalIsomorphism.f isoB) (NaturalIsomorphism.f isoA)
-              ; g = Category._∘_ (functor-category C D cong) (NaturalIsomorphism.g isoA) (NaturalIsomorphism.g isoB)
+              { f = Category._∘_ (functor-category C D) (NaturalIsomorphism.f isoB) (NaturalIsomorphism.f isoA)
+              ; g = Category._∘_ (functor-category C D) (NaturalIsomorphism.g isoA) (NaturalIsomorphism.g isoB)
               ; isomorphicˡ =
                   let
                     k = (NaturalTransformation.transform-object (NaturalIsomorphism.g isoA))
@@ -213,11 +208,11 @@ functor-setoid C D cong =
                     (k ∘ h) ∘ (g ∘ f)
                   ≈⟨ law-associative (k ∘ h) g f ⟩
                     ((k ∘ h) ∘ g) ∘ f
-                  ≈⟨ cong (_∘ f) (sym (law-associative k h g)) ⟩
+                  ≈⟨ sym (law-associative k h g) ⟩∘⟨ refl ⟩
                     (k ∘ (h ∘ g)) ∘ f
-                  ≈⟨ cong (λ x → (k ∘ x) ∘ f) (NaturalIsomorphism.isomorphicˡ isoB) ⟩
+                  ≈⟨ (refl ⟩∘⟨ NaturalIsomorphism.isomorphicˡ isoB) ⟩∘⟨ refl ⟩
                     (k ∘ id) ∘ f
-                  ≈⟨ cong (_∘ f) (law-identityʳ k) ⟩
+                  ≈⟨ law-identityʳ k ⟩∘⟨ refl ⟩
                     k ∘ f
                   ≈⟨ NaturalIsomorphism.isomorphicˡ isoA ⟩
                     id
@@ -235,11 +230,11 @@ functor-setoid C D cong =
                     (k ∘ h) ∘ (g ∘ f)
                   ≈⟨ law-associative (k ∘ h) g f ⟩
                     ((k ∘ h) ∘ g) ∘ f
-                  ≈⟨ cong (_∘ f) (sym (law-associative k h g)) ⟩
+                  ≈⟨ sym (law-associative k h g) ⟩∘⟨ refl ⟩
                     (k ∘ (h ∘ g)) ∘ f
-                  ≈⟨ cong (λ x → (k ∘ x) ∘ f) (NaturalIsomorphism.isomorphicʳ isoA) ⟩
+                  ≈⟨ (refl ⟩∘⟨ NaturalIsomorphism.isomorphicʳ isoA) ⟩∘⟨ refl ⟩
                     (k ∘ id) ∘ f
-                  ≈⟨ cong (_∘ f) (law-identityʳ k) ⟩
+                  ≈⟨ law-identityʳ k ⟩∘⟨ refl ⟩
                     k ∘ f
                   ≈⟨ NaturalIsomorphism.isomorphicʳ isoB ⟩
                     id

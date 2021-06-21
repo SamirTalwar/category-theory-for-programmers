@@ -70,7 +70,7 @@ module List where
       ; composes = ext composes
       }
     where
-    map-id : ∀ {ℓ} {A : Set ℓ} → (x : List A) → map Function.id x ≡ x
+    map-id : ∀ {ℓ} {A : Set ℓ} → (x : List A) → map id x ≡ x
     map-id [] = refl
     map-id (x ∷ xs) = cong (x ∷_) (map-id xs)
     composes : ∀ {ℓ} {A B C : Set ℓ} {g : B → C} {f : A → B} → (x : List A) → map (g ∘ f) x ≡ map g (map f x)

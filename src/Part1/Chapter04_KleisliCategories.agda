@@ -35,6 +35,7 @@ module PartialFunctions where
                    ; law-identityˡ = λ{ f → ext (law-identityˡ f) }
                    ; law-identityʳ = λ{ f → ext (law-identityʳ f) }
                    ; law-associative = λ{ h g f → ext (law-associative h g f) }
+                   ; _⟩∘⟨_ = λ{ refl refl → refl }
                    }
     where
     id : ∀ {A} → A → Optional A

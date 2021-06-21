@@ -5,7 +5,7 @@ open import Relation.Binary hiding (_⇒_)
 
 record Category (α β : Level) : Set (suc α ⊔ suc β) where
   infix 10 _⇒_
-  infixr 9 _∘_
+  infixr 9 _∘_ _⟩∘⟨_
   infix 4 _≈_
 
   field
@@ -38,16 +38,23 @@ record Category (α β : Level) : Set (suc α ⊔ suc β) where
       → (f : A ⇒ B)
       → (h ∘ (g ∘ f)) ≈ ((h ∘ g) ∘ f)
 
+    _⟩∘⟨_ : ∀ {A B C} {g₁ g₂ : B ⇒ C} {f₁ f₂ : A ⇒ B}
+      → g₁ ≈ g₂
+      → f₁ ≈ f₂
+      → g₁ ∘ f₁ ≈ g₂ ∘ f₂
+
 Category₀ = Category Level.zero Level.zero
 
 module Function where
-  open import Relation.Binary.PropositionalEquality
+  import Function as F
+  open import Relation.Binary.PropositionalEquality hiding (Extensionality)
+  open Relation.Binary.PropositionalEquality.≡-Reasoning
 
   id : ∀ {ℓ} {A : Set ℓ} → A → A
-  id x = x
+  id = F.id
 
-  _∘_ : ∀ {ℓ} {A B C : Set ℓ} → (B → C) → (A → B) → (A → C)
-  (g ∘ f) x = g (f x)
+  _∘_ : ∀ {ℓ} {A B C : Set ℓ} → (B → C) → (A → B) → A → C
+  _∘_ = F._∘′_
 
   category : ∀ (ℓ : Level) → Category (suc ℓ) ℓ
   category ℓ =
@@ -62,4 +69,5 @@ module Function where
       ; law-identityˡ = λ f → refl
       ; law-identityʳ = λ f → refl
       ; law-associative = λ h g f → refl
+      ; _⟩∘⟨_ = cong₂ _∘_
       }
