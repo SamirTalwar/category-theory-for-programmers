@@ -1,12 +1,15 @@
 module Part1.Chapter10_NaturalTransformations where
 
+open import Data.Product
 open import Level
-open import Relation.Binary.Bundles
-open import Relation.Binary.Structures
+open import Relation.Binary hiding (_⇒_)
+import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid
 
 open import Part1.Chapter01_Category
 open import Part1.Chapter07_Functors as Functors
+open import Part1.Chapter08_Functoriality
+open import Part1.Chapter09_FunctionTypes
 
 record NaturalTransformation {α β}
     {C D : Category α β}
@@ -23,7 +26,7 @@ module NaturalTransformationExamples where
   open import Data.List
   open import Data.Maybe
   open import Data.Nat
-  open import Relation.Binary.PropositionalEquality hiding (Extensionality)
+  open Relation.Binary.PropositionalEquality hiding (Extensionality)
   open Relation.Binary.PropositionalEquality.≡-Reasoning
 
   list-to-maybe : ∀ {ℓ}
@@ -83,21 +86,24 @@ module NaturalTransformationExamples where
     scam : ∀ {A C : Set} → Const C A → Maybe A
     scam (const _) = nothing
 
+Cong : ∀ {α β} → Category α β → Set (α ⊔ β)
+Cong category = let open Category category in ∀ {a b c d : Object} (f : a ⇒ b → c ⇒ d) {x y : a ⇒ b} → x ≈ y → f x ≈ f y
+
 functor-category : ∀ {α} {β}
   → (C D : Category α β)
-  → (let open Category D in ∀ {A B C D} (f : A ⇒ B → C ⇒ D) {x y : A ⇒ B} → x ≈ y → f x ≈ f y)
+  → (cong : Cong D)
   → Category (α ⊔ β) (α ⊔ β)
 functor-category {α} {β} C D cong =
   let open Category D in
   record
     { Object = C -F-> D
     ; _⇒_ = NaturalTransformation
-    ; _≈_ = λ f g → Lift (α ⊔ β) (NaturalTransformation.transform-object f ≈ NaturalTransformation.transform-object g)
+    ; _≈_ = λ f g → ∀ {x : Category.Object C} → Lift (α ⊔ β) (NaturalTransformation.transform-object f {x} ≈ NaturalTransformation.transform-object g {x})
     ; isEquivalence =
         record
           { refl = lift refl
-          ; sym = λ{ (lift x) → lift (sym x) }
-          ; trans = λ{ (lift f) (lift g) → lift (trans f g) }
+          ; sym = λ{ x → lift (sym (lower x)) }
+          ; trans = λ{ f g → lift (trans (lower f) (lower g)) }
           }
     ; id = λ{ {F} →
         record
@@ -138,3 +144,106 @@ functor-category {α} {β} C D cong =
     ; law-identityʳ = λ f → lift (law-identityʳ (NaturalTransformation.transform-object f))
     ; law-associative = λ h g f → lift (law-associative (NaturalTransformation.transform-object h) (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f))
     }
+
+natural-transformation-id : ∀ {α β} {C D : Category α β}
+  → (F : C -F-> D)
+  → NaturalTransformation F F
+natural-transformation-id {C = C} {D = D} F =
+  record
+    { transform-object = Category.id D
+    ; naturality-condition = λ {A} {B} {f} →
+        let
+          open Category D
+          open Relation.Binary.Reasoning.Setoid setoid
+        in
+        begin
+          Functor.map F f ∘ id
+        ≈⟨ law-identityʳ (Functor.map F f) ⟩
+          Functor.map F f
+        ≈⟨ sym (law-identityˡ (Functor.map F f)) ⟩
+          id ∘ Functor.map F f
+        ∎
+    }
+
+record NaturalIsomorphism {α β} {C D : Category α β} (F G : C -F-> D) : Set (α ⊔ β) where
+  field
+    f : NaturalTransformation F G
+    g : NaturalTransformation G F
+    isomorphicˡ : ∀ {x : Category.Object C} →
+      let open Category D in NaturalTransformation.transform-object g {x} ∘ NaturalTransformation.transform-object f {x} ≈ id
+    isomorphicʳ : ∀ {x : Category.Object C} →
+      let open Category D in NaturalTransformation.transform-object f {x} ∘ NaturalTransformation.transform-object g {x} ≈ id
+
+functor-setoid : ∀ {α β} → (C D : Category α β) → (cong : Cong D) → Setoid _ _
+functor-setoid C D cong =
+  record
+    { Carrier = C -F-> D
+    ; _≈_ = NaturalIsomorphism
+    ; isEquivalence = record
+        { refl = λ {F} →
+            let open Category D in
+            record
+              { f = natural-transformation-id F
+              ; g = natural-transformation-id F
+              ; isomorphicˡ = Category.law-identityˡ D id
+              ; isomorphicʳ = Category.law-identityʳ D id
+              }
+        ; sym = λ iso →
+            let open NaturalIsomorphism iso in
+            record
+              { f = g
+              ; g = f
+              ; isomorphicˡ = isomorphicʳ
+              ; isomorphicʳ = isomorphicˡ
+              }
+        ; trans = λ isoA isoB →
+            record
+              { f = Category._∘_ (functor-category C D cong) (NaturalIsomorphism.f isoB) (NaturalIsomorphism.f isoA)
+              ; g = Category._∘_ (functor-category C D cong) (NaturalIsomorphism.g isoA) (NaturalIsomorphism.g isoB)
+              ; isomorphicˡ =
+                  let
+                    k = (NaturalTransformation.transform-object (NaturalIsomorphism.g isoA))
+                    h = (NaturalTransformation.transform-object (NaturalIsomorphism.g isoB))
+                    g = (NaturalTransformation.transform-object (NaturalIsomorphism.f isoB))
+                    f = (NaturalTransformation.transform-object (NaturalIsomorphism.f isoA))
+                    open Category D
+                    open Relation.Binary.Reasoning.Setoid setoid
+                  in
+                  begin
+                    (k ∘ h) ∘ (g ∘ f)
+                  ≈⟨ law-associative (k ∘ h) g f ⟩
+                    ((k ∘ h) ∘ g) ∘ f
+                  ≈⟨ cong (_∘ f) (sym (law-associative k h g)) ⟩
+                    (k ∘ (h ∘ g)) ∘ f
+                  ≈⟨ cong (λ x → (k ∘ x) ∘ f) (NaturalIsomorphism.isomorphicˡ isoB) ⟩
+                    (k ∘ id) ∘ f
+                  ≈⟨ cong (_∘ f) (law-identityʳ k) ⟩
+                    k ∘ f
+                  ≈⟨ NaturalIsomorphism.isomorphicˡ isoA ⟩
+                    id
+                  ∎
+              ; isomorphicʳ =
+                  let
+                    k = (NaturalTransformation.transform-object (NaturalIsomorphism.f isoB))
+                    h = (NaturalTransformation.transform-object (NaturalIsomorphism.f isoA))
+                    g = (NaturalTransformation.transform-object (NaturalIsomorphism.g isoA))
+                    f = (NaturalTransformation.transform-object (NaturalIsomorphism.g isoB))
+                    open Category D
+                    open Relation.Binary.Reasoning.Setoid setoid
+                  in
+                  begin
+                    (k ∘ h) ∘ (g ∘ f)
+                  ≈⟨ law-associative (k ∘ h) g f ⟩
+                    ((k ∘ h) ∘ g) ∘ f
+                  ≈⟨ cong (_∘ f) (sym (law-associative k h g)) ⟩
+                    (k ∘ (h ∘ g)) ∘ f
+                  ≈⟨ cong (λ x → (k ∘ x) ∘ f) (NaturalIsomorphism.isomorphicʳ isoA) ⟩
+                    (k ∘ id) ∘ f
+                  ≈⟨ cong (_∘ f) (law-identityʳ k) ⟩
+                    k ∘ f
+                  ≈⟨ NaturalIsomorphism.isomorphicʳ isoB ⟩
+                    id
+                  ∎
+              }
+        }
+      }

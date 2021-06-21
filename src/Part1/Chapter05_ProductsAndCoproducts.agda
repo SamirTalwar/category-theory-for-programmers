@@ -19,24 +19,20 @@ module Isomorphism where
     = record { f = g ; g = f ; isomorphicˡ = isomorphicʳ ; isomorphicʳ = isomorphicˡ }
 
 module Opposite where
-  open import Relation.Binary.Definitions
-  open import Relation.Binary.PropositionalEquality hiding (Extensionality)
-
   opposite : ∀ {α β} (category : Category α β) → Category α β
   opposite category =
+    let open Category category in
     record
       { Object = Object
       ; _⇒_ = λ y x → x ⇒ y
       ; _≈_ = _≈_
-      ; isEquivalence = Category.isEquivalence category
+      ; isEquivalence = isEquivalence
       ; id = id
       ; _∘_ = λ g f → f ∘ g
       ; law-identityˡ = law-identityʳ
       ; law-identityʳ = law-identityˡ
-      ; law-associative = λ h g f → Category.sym category (law-associative f g h)
+      ; law-associative = λ h g f → sym (law-associative f g h)
       }
-      where
-      open Category category
 
 module InitialObject where
   open import Relation.Binary.PropositionalEquality hiding (Extensionality)

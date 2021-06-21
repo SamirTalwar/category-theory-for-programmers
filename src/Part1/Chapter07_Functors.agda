@@ -8,7 +8,7 @@ open import Part1.Chapter01_Category
 record Functor {α β} (C D : Category α β) : Set (α ⊔ β) where
   field
     construct : Category.Object C → Category.Object D
-    map : ∀ {A B : Category.Object C} → Category._⇒_ C A B → Category._⇒_ D (construct A) (construct B)
+    map : ∀ {a b : Category.Object C} → Category._⇒_ C a b → Category._⇒_ D (construct a) (construct b)
 
     map-id : ∀ {a : Category.Object C}
       → let open Category D in map (Category.id C {a}) ≈ id {construct a}
