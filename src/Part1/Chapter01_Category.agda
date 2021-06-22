@@ -43,6 +43,19 @@ record Category (α β : Level) : Set (suc α ⊔ suc β) where
       → f₁ ≈ f₂
       → g₁ ∘ f₁ ≈ g₂ ∘ f₂
 
+  ilaw-identityˡ : ∀ {A B : Object} {f : A ⇒ B}
+    → (id ∘ f) ≈ f
+  ilaw-identityˡ {f = f} = law-identityˡ f
+  ilaw-identityʳ : ∀ {A B : Object} {f : A ⇒ B}
+    → (f ∘ id) ≈ f
+  ilaw-identityʳ {f = f} = law-identityʳ f
+  ilaw-associative : ∀ {A B C D : Object}
+    → {h : C ⇒ D}
+    → {g : B ⇒ C}
+    → {f : A ⇒ B}
+    → (h ∘ (g ∘ f)) ≈ ((h ∘ g) ∘ f)
+  ilaw-associative {h = h} {g = g} {f = f} = law-associative h g f
+
 Category₀ = Category Level.zero Level.zero
 
 module Function where

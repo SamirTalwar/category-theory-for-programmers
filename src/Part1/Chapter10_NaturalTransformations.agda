@@ -106,9 +106,9 @@ functor-category {α} {β} C D =
               let open Relation.Binary.Reasoning.Setoid setoid in
               begin
                 Functor.map F f ∘ id
-              ≈⟨ law-identityʳ (Functor.map F f) ⟩
+              ≈⟨ ilaw-identityʳ ⟩
                 Functor.map F f
-              ≈⟨ sym (law-identityˡ (Functor.map F f)) ⟩
+              ≈⟨ sym ilaw-identityˡ ⟩
                 id ∘ Functor.map F f
               ∎
             }
@@ -121,15 +121,15 @@ functor-category {α} {β} C D =
               let open Relation.Binary.Reasoning.Setoid setoid in
               begin
                 Functor.map C morphism ∘ (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f)
-              ≈⟨ law-associative (Functor.map C morphism) (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f) ⟩
+              ≈⟨ ilaw-associative ⟩
                 (Functor.map C morphism ∘ NaturalTransformation.transform-object g) ∘ NaturalTransformation.transform-object f
               ≈⟨ NaturalTransformation.naturality-condition g ⟩∘⟨ refl ⟩
                 (NaturalTransformation.transform-object g ∘ Functor.map B morphism) ∘ NaturalTransformation.transform-object f
-              ≈⟨ sym (law-associative (NaturalTransformation.transform-object g) (Functor.map B morphism) (NaturalTransformation.transform-object f)) ⟩
+              ≈⟨ sym ilaw-associative ⟩
                 NaturalTransformation.transform-object g ∘ (Functor.map B morphism ∘ NaturalTransformation.transform-object f)
               ≈⟨ refl ⟩∘⟨ NaturalTransformation.naturality-condition f ⟩
                 NaturalTransformation.transform-object g ∘ (NaturalTransformation.transform-object f ∘ Functor.map A morphism)
-              ≈⟨ law-associative (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f) (Functor.map A morphism) ⟩
+              ≈⟨ ilaw-associative ⟩
                 (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f) ∘ Functor.map A morphism
               ∎
             }
@@ -153,9 +153,9 @@ natural-transformation-id {C = C} {D = D} F =
         in
         begin
           Functor.map F f ∘ id
-        ≈⟨ law-identityʳ (Functor.map F f) ⟩
+        ≈⟨ ilaw-identityʳ ⟩
           Functor.map F f
-        ≈⟨ sym (law-identityˡ (Functor.map F f)) ⟩
+        ≈⟨ sym ilaw-identityˡ ⟩
           id ∘ Functor.map F f
         ∎
     }
@@ -206,13 +206,13 @@ functor-setoid C D =
                   in
                   begin
                     (k ∘ h) ∘ (g ∘ f)
-                  ≈⟨ law-associative (k ∘ h) g f ⟩
+                  ≈⟨ ilaw-associative ⟩
                     ((k ∘ h) ∘ g) ∘ f
-                  ≈⟨ sym (law-associative k h g) ⟩∘⟨ refl ⟩
+                  ≈⟨ sym ilaw-associative ⟩∘⟨ refl ⟩
                     (k ∘ (h ∘ g)) ∘ f
                   ≈⟨ (refl ⟩∘⟨ NaturalIsomorphism.isomorphicˡ isoB) ⟩∘⟨ refl ⟩
                     (k ∘ id) ∘ f
-                  ≈⟨ law-identityʳ k ⟩∘⟨ refl ⟩
+                  ≈⟨ ilaw-identityʳ ⟩∘⟨ refl ⟩
                     k ∘ f
                   ≈⟨ NaturalIsomorphism.isomorphicˡ isoA ⟩
                     id
@@ -228,13 +228,13 @@ functor-setoid C D =
                   in
                   begin
                     (k ∘ h) ∘ (g ∘ f)
-                  ≈⟨ law-associative (k ∘ h) g f ⟩
+                  ≈⟨ ilaw-associative ⟩
                     ((k ∘ h) ∘ g) ∘ f
-                  ≈⟨ sym (law-associative k h g) ⟩∘⟨ refl ⟩
+                  ≈⟨ sym ilaw-associative ⟩∘⟨ refl ⟩
                     (k ∘ (h ∘ g)) ∘ f
                   ≈⟨ (refl ⟩∘⟨ NaturalIsomorphism.isomorphicʳ isoA) ⟩∘⟨ refl ⟩
                     (k ∘ id) ∘ f
-                  ≈⟨ law-identityʳ k ⟩∘⟨ refl ⟩
+                  ≈⟨ ilaw-identityʳ ⟩∘⟨ refl ⟩
                     k ∘ f
                   ≈⟨ NaturalIsomorphism.isomorphicʳ isoB ⟩
                     id
@@ -249,19 +249,19 @@ compose-functors {_} {_} {C} {D} {E} DE CD =
   record
     { construct = Functor.construct DE ∘ Functor.construct CD
     ; map = Functor.map DE ∘ Functor.map CD
-    ; map-id =
+    ; law-map-id =
         let
           open Category E
           open Relation.Binary.Reasoning.Setoid setoid
         in
         begin
           Functor.map DE (Functor.map CD (Category.id C))
-        ≈⟨ Functor.preserves-equality DE (Functor.map-id CD) ⟩
+        ≈⟨ Functor.law-preserves-equality DE (Functor.law-map-id CD) ⟩
           Functor.map DE (Category.id D)
-        ≈⟨ Functor.map-id DE ⟩
+        ≈⟨ Functor.law-map-id DE ⟩
           Category.id E
         ∎
-    ; composes = λ {_} {_} {_} {g} {f} →
+    ; law-composes = λ {_} {_} {_} {g} {f} →
         let
           module C = Category C
           module D = Category D
@@ -270,12 +270,12 @@ compose-functors {_} {_} {C} {D} {E} DE CD =
         in
         begin
           Functor.map DE (Functor.map CD (g C.∘ f))
-        ≈⟨ Functor.preserves-equality DE (Functor.composes CD) ⟩
+        ≈⟨ Functor.law-preserves-equality DE (Functor.law-composes CD) ⟩
           Functor.map DE (Functor.map CD g D.∘ Functor.map CD f)
-        ≈⟨ Functor.composes DE ⟩
+        ≈⟨ Functor.law-composes DE ⟩
           Functor.map DE (Functor.map CD g) E.∘ Functor.map DE (Functor.map CD f)
         ∎
-    ; preserves-equality = λ {_} {_} {f} {g} f≡g →
+    ; law-preserves-equality = λ {_} {_} {f} {g} f≡g →
         let
           module C = Category C
           module D = Category D
@@ -284,7 +284,7 @@ compose-functors {_} {_} {C} {D} {E} DE CD =
         in
         begin
           (Functor.map DE (Functor.map CD f))
-        ≈⟨ Functor.preserves-equality DE (Functor.preserves-equality CD f≡g) ⟩
+        ≈⟨ Functor.law-preserves-equality DE (Functor.law-preserves-equality CD f≡g) ⟩
           (Functor.map DE (Functor.map CD g))
         ∎
     }

@@ -83,9 +83,9 @@ module Pair where
     record
       { construct = λ{ (A , B) → Pair A B }
       ; map = λ{ (f , g) → bimap f g }
-      ; map-id = refl
-      ; composes = refl
-      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
+      ; law-map-id = refl
+      ; law-composes = refl
+      ; law-preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module IsomorphicMaybe where
@@ -128,9 +128,9 @@ module PreList where
     record
       { construct = λ{ (A , B) → PreList A B }
       ; map = λ{ (f , g) → bimap f g }
-      ; map-id = ext λ{ nil → refl ; (cons head tail) → refl }
-      ; composes = ext λ{ nil → refl ; (cons head tail) → refl }
-      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
+      ; law-map-id = ext λ{ nil → refl ; (cons head tail) → refl }
+      ; law-composes = ext λ{ nil → refl ; (cons head tail) → refl }
+      ; law-preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module K2 where
@@ -146,9 +146,9 @@ module K2 where
     record
       { construct = λ{ (A , B) → K2 C A B }
       ; map = λ{ (f , g) → bimap f g }
-      ; map-id = refl
-      ; composes = refl
-      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
+      ; law-map-id = refl
+      ; law-composes = refl
+      ; law-preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module Fst where
@@ -164,9 +164,9 @@ module Fst where
     record
       { construct = λ{ (A , B) → Fst A B }
       ; map = λ{ (f , g) → bimap f g }
-      ; map-id = refl
-      ; composes = refl
-      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
+      ; law-map-id = refl
+      ; law-composes = refl
+      ; law-preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module Snd where
@@ -182,9 +182,9 @@ module Snd where
     record
       { construct = λ{ (A , B) → Snd A B }
       ; map = λ{ (f , g) → bimap f g }
-      ; map-id = refl
-      ; composes = refl
-      ; preserves-equality = λ{ (f , g) → cong₂ bimap f g }
+      ; law-map-id = refl
+      ; law-composes = refl
+      ; law-preserves-equality = λ{ (f , g) → cong₂ bimap f g }
       }
 
 module Functions where
@@ -196,7 +196,7 @@ module Functions where
     record
       { construct = λ{ (A , B) → A → B }
       ; map = λ{ (f , g) → dimap f g }
-      ; map-id = refl
-      ; composes = refl
-      ; preserves-equality = λ{ (f , g) → cong₂ dimap f g }
+      ; law-map-id = refl
+      ; law-composes = refl
+      ; law-preserves-equality = λ{ (f , g) → cong₂ dimap f g }
       }

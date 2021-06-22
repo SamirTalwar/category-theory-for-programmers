@@ -63,9 +63,9 @@ set-is-bicartesian-closed ext =
               record
                 { construct = λ{ (A , B) → A × B }
                 ; map = λ{ (f , g) (x , y) → f x , g y }
-                ; map-id = refl
-                ; composes = refl
-                ; preserves-equality = λ{ (f , g) → cong₂ (λ{ f g (x , y) → f x , g y }) f g }
+                ; law-map-id = refl
+                ; law-composes = refl
+                ; law-preserves-equality = λ{ (f , g) → cong₂ (λ{ f g (x , y) → f x , g y }) f g }
                 }
           ; product = λ{ {A} {B} →
               record
