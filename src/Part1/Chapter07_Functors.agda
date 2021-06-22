@@ -31,14 +31,14 @@ Endofunctor category = category -F-> category
 module Id where
   open Part1.Chapter01_Category.Function
 
-  functor : ∀ {ℓ} → Endofunctor (Function.category ℓ)
-  functor =
+  functor : ∀ {α β} → (category : Category α β) → Endofunctor category
+  functor category =
     record
       { construct = id
-      ; map = λ f x → f x
-      ; law-map-id = refl
-      ; law-composes = refl
-      ; law-preserves-equality = icong
+      ; map = id
+      ; law-map-id = Category.refl category
+      ; law-composes = Category.refl category
+      ; law-preserves-equality = id
       }
 
 module Maybe where

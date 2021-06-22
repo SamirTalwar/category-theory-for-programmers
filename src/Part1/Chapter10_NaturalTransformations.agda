@@ -86,60 +86,6 @@ module NaturalTransformationExamples where
     scam : ∀ {A C : Set} → Const C A → Maybe A
     scam (const _) = nothing
 
-functor-category : ∀ {α} {β} → (C D : Category α β) → Category (α ⊔ β) (α ⊔ β)
-functor-category {α} {β} C D =
-  let open Category D in
-  record
-    { Object = C -F-> D
-    ; _⇒_ = NaturalTransformation
-    ; _≈_ = λ f g → ∀ {x : Category.Object C} → Lift (α ⊔ β) (NaturalTransformation.transform-object f {x} ≈ NaturalTransformation.transform-object g {x})
-    ; isEquivalence =
-        record
-          { refl = lift refl
-          ; sym = λ{ x → lift (sym (lower x)) }
-          ; trans = λ{ f g → lift (trans (lower f) (lower g)) }
-          }
-    ; id = λ{ {F} →
-        record
-          { transform-object = id
-          ; naturality-condition = λ{ {f = f} →
-              let open Relation.Binary.Reasoning.Setoid setoid in
-              begin
-                Functor.map F f ∘ id
-              ≈⟨ ilaw-identityʳ ⟩
-                Functor.map F f
-              ≈⟨ sym ilaw-identityˡ ⟩
-                id ∘ Functor.map F f
-              ∎
-            }
-          }
-      }
-    ; _∘_ = λ {A} {B} {C} g f →
-        record
-          { transform-object = NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f
-          ; naturality-condition = λ{ {f = morphism} →
-              let open Relation.Binary.Reasoning.Setoid setoid in
-              begin
-                Functor.map C morphism ∘ (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f)
-              ≈⟨ ilaw-associative ⟩
-                (Functor.map C morphism ∘ NaturalTransformation.transform-object g) ∘ NaturalTransformation.transform-object f
-              ≈⟨ NaturalTransformation.naturality-condition g ⟩∘⟨ refl ⟩
-                (NaturalTransformation.transform-object g ∘ Functor.map B morphism) ∘ NaturalTransformation.transform-object f
-              ≈⟨ sym ilaw-associative ⟩
-                NaturalTransformation.transform-object g ∘ (Functor.map B morphism ∘ NaturalTransformation.transform-object f)
-              ≈⟨ refl ⟩∘⟨ NaturalTransformation.naturality-condition f ⟩
-                NaturalTransformation.transform-object g ∘ (NaturalTransformation.transform-object f ∘ Functor.map A morphism)
-              ≈⟨ ilaw-associative ⟩
-                (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f) ∘ Functor.map A morphism
-              ∎
-            }
-          }
-    ; law-identityˡ = λ f → lift (law-identityˡ (NaturalTransformation.transform-object f))
-    ; law-identityʳ = λ f → lift (law-identityʳ (NaturalTransformation.transform-object f))
-    ; law-associative = λ h g f → lift (law-associative (NaturalTransformation.transform-object h) (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f))
-    ; _⟩∘⟨_ = λ g f → lift (lower g ⟩∘⟨ lower f)
-    }
-
 natural-transformation-id : ∀ {α β} {C D : Category α β}
   → (F : C -F-> D)
   → NaturalTransformation F F
@@ -160,6 +106,53 @@ natural-transformation-id {C = C} {D = D} F =
         ∎
     }
 
+compose-natural-transformations : ∀ {α β} {C D : Category α β} {F G H : C -F-> D}
+  → NaturalTransformation G H
+  → NaturalTransformation F G
+  → NaturalTransformation F H
+compose-natural-transformations {_} {_} {C} {D} {F} {G} {H} g f =
+  let open Category D in
+  record
+    { transform-object = NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f
+    ; naturality-condition = λ{ {f = morphism} →
+        let open Relation.Binary.Reasoning.Setoid setoid in
+        begin
+          Functor.map H morphism ∘ (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f)
+        ≈⟨ ilaw-associative ⟩
+          (Functor.map H morphism ∘ NaturalTransformation.transform-object g) ∘ NaturalTransformation.transform-object f
+        ≈⟨ NaturalTransformation.naturality-condition g ⟩∘⟨ refl ⟩
+          (NaturalTransformation.transform-object g ∘ Functor.map G morphism) ∘ NaturalTransformation.transform-object f
+        ≈⟨ sym ilaw-associative ⟩
+          NaturalTransformation.transform-object g ∘ (Functor.map G morphism ∘ NaturalTransformation.transform-object f)
+        ≈⟨ refl ⟩∘⟨ NaturalTransformation.naturality-condition f ⟩
+          NaturalTransformation.transform-object g ∘ (NaturalTransformation.transform-object f ∘ Functor.map F morphism)
+        ≈⟨ ilaw-associative ⟩
+          (NaturalTransformation.transform-object g ∘ NaturalTransformation.transform-object f) ∘ Functor.map F morphism
+        ∎
+      }
+    }
+
+functor-category : ∀ {α} {β} → (C D : Category α β) → Category (α ⊔ β) (α ⊔ β)
+functor-category {α} {β} C D =
+  let open Category D in
+  record
+    { Object = C -F-> D
+    ; _⇒_ = NaturalTransformation
+    ; _≈_ = λ f g → ∀ {x : Category.Object C} → Lift (α ⊔ β) (NaturalTransformation.transform-object f {x} ≈ NaturalTransformation.transform-object g {x})
+    ; isEquivalence =
+        record
+          { refl = lift refl
+          ; sym = λ{ x → lift (sym (lower x)) }
+          ; trans = λ{ f g → lift (trans (lower f) (lower g)) }
+          }
+    ; id = λ {F} → natural-transformation-id F
+    ; _∘_ = compose-natural-transformations
+    ; law-identityˡ = λ f → lift (law-identityˡ (NaturalTransformation.transform-object f))
+    ; law-identityʳ = λ f → lift (law-identityʳ (NaturalTransformation.transform-object f))
+    ; law-associative = λ h g f → lift (law-associative (NaturalTransformation.transform-object h) (NaturalTransformation.transform-object g) (NaturalTransformation.transform-object f))
+    ; _⟩∘⟨_ = λ g f → lift (lower g ⟩∘⟨ lower f)
+    }
+
 record NaturalIsomorphism {α β} {C D : Category α β} (F G : C -F-> D) : Set (α ⊔ β) where
   field
     f : NaturalTransformation F G
@@ -169,7 +162,7 @@ record NaturalIsomorphism {α β} {C D : Category α β} (F G : C -F-> D) : Set 
     isomorphicʳ : ∀ {x : Category.Object C} →
       let open Category D in NaturalTransformation.transform-object f {x} ∘ NaturalTransformation.transform-object g {x} ≈ id
 
-functor-setoid : ∀ {α β} → (C D : Category α β) → Setoid _ _
+functor-setoid : ∀ {α β} → (C D : Category α β) → Setoid (α ⊔ β) (α ⊔ β)
 functor-setoid C D =
   record
     { Carrier = C -F-> D
@@ -287,4 +280,247 @@ compose-functors {_} {_} {C} {D} {E} DE CD =
         ≈⟨ Functor.law-preserves-equality DE (Functor.law-preserves-equality CD f≡g) ⟩
           (Functor.map DE (Functor.map CD g))
         ∎
+    }
+
+functors-are-associative : ∀ {α β} {C D E F : Category α β}
+  → (h : E -F-> F) (g : D -F-> E) (f : C -F-> D)
+  → Setoid._≈_ (functor-setoid C F) (compose-functors h (compose-functors g f)) (compose-functors (compose-functors h g) f)
+functors-are-associative {_} {_} {C} {D} {E} {F} h g f =
+  record
+    { f =
+        record
+          { transform-object = Category.id F
+          ; naturality-condition = NaturalTransformation.naturality-condition id
+          }
+    ; g =
+        record
+          { transform-object = Category.id F
+          ; naturality-condition = NaturalTransformation.naturality-condition id
+          }
+    ; isomorphicˡ = Category.law-identityˡ F (NaturalTransformation.transform-object id)
+    ; isomorphicʳ = Category.law-identityʳ F (NaturalTransformation.transform-object id)
+    }
+  where
+  id = natural-transformation-id (compose-functors h (compose-functors g f))
+
+cat : ∀ (α β : Level) → Category (suc α ⊔ suc β) (α ⊔ β)
+cat α β =
+  record
+    { Object = Category α β
+    ; _⇒_ = Functor
+    ; _≈_ = λ {C} {D} → Setoid._≈_ (functor-setoid C D)
+    ; isEquivalence = λ {C} {D} → Setoid.isEquivalence (functor-setoid C D)
+    ; id = λ {C} → Functors.Id.functor C
+    ; _∘_ = compose-functors
+    ; law-identityˡ = λ {C} {D} f →
+        record
+          { f =
+              record
+                { transform-object = NaturalTransformation.transform-object (natural-transformation-id f)
+                ; naturality-condition = NaturalTransformation.naturality-condition (natural-transformation-id f)
+                }
+          ; g =
+              record
+                { transform-object = NaturalTransformation.transform-object (natural-transformation-id f)
+                ; naturality-condition = NaturalTransformation.naturality-condition (natural-transformation-id f)
+                }
+          ; isomorphicˡ = Category.law-identityˡ D (Category.id D)
+          ; isomorphicʳ = Category.law-identityʳ D (Category.id D)
+          }
+    ; law-identityʳ = λ {C} {D} f →
+        record
+          { f =
+              record
+                { transform-object = NaturalTransformation.transform-object (natural-transformation-id f)
+                ; naturality-condition = NaturalTransformation.naturality-condition (natural-transformation-id f)
+                }
+          ; g =
+              record
+                { transform-object = NaturalTransformation.transform-object (natural-transformation-id f)
+                ; naturality-condition = NaturalTransformation.naturality-condition (natural-transformation-id f)
+                }
+          ; isomorphicˡ = Category.law-identityˡ D (Category.id D)
+          ; isomorphicʳ = Category.law-identityʳ D (Category.id D)
+          }
+    ; law-associative = functors-are-associative
+    ; _⟩∘⟨_ = λ {A} {B} {C} {g₁} {g₂} {f₁} {f₂} g≈g f≈f →
+        let open Category C in
+        record
+          { f =
+              record
+                { transform-object =
+                    NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                      ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+                ; naturality-condition = λ {_} {_} {f} →
+                    let open Relation.Binary.Reasoning.Setoid setoid in
+                    begin
+                      Functor.map (compose-functors g₂ f₂) f
+                        ∘ (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                          ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                    ≈⟨ ilaw-associative ⟩
+                      (Functor.map (compose-functors g₂ f₂) f
+                          ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g))
+                        ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+                    ≈⟨ NaturalTransformation.naturality-condition (NaturalIsomorphism.f g≈g) ⟩∘⟨ refl ⟩
+                      (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                          ∘ Functor.map (compose-functors g₁ f₂) f)
+                        ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+                    ≈⟨ sym ilaw-associative ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                        ∘ (Functor.map (compose-functors g₁ f₂) f
+                          ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                    ≈⟨ refl ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                        ∘ (Functor.map g₁ (Functor.map f₂ f)
+                          ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                    ≈⟨ refl ⟩∘⟨ sym (Functor.law-composes g₁) ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                        ∘ Functor.map g₁ (Category._∘_ B (Functor.map f₂ f) (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                    ≈⟨ refl ⟩∘⟨ Functor.law-preserves-equality g₁ (NaturalTransformation.naturality-condition (NaturalIsomorphism.f f≈f)) ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                        ∘ Functor.map g₁ (Category._∘_ B (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)) (Functor.map f₁ f))
+                    ≈⟨ refl ⟩∘⟨ Functor.law-composes g₁ ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                        ∘ (Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+                          ∘ Functor.map g₁ (Functor.map f₁ f))
+                    ≈⟨ refl ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                        ∘ (Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+                          ∘ Functor.map (compose-functors g₁ f₁) f)
+                    ≈⟨ ilaw-associative ⟩
+                      (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                          ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                        ∘ Functor.map (compose-functors g₁ f₁) f
+                    ∎
+                }
+          ; g =
+              record
+                { transform-object =
+                    NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                      ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+                ; naturality-condition = λ {_} {_} {f} →
+                    let open Relation.Binary.Reasoning.Setoid setoid in
+                    begin
+                      Functor.map (compose-functors g₁ f₁) f
+                        ∘ (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                          ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                    ≈⟨ ilaw-associative ⟩
+                      (Functor.map (compose-functors g₁ f₁) f
+                          ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g))
+                        ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+                    ≈⟨ NaturalTransformation.naturality-condition (NaturalIsomorphism.g g≈g) ⟩∘⟨ refl ⟩
+                      (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                          ∘ Functor.map (compose-functors g₂ f₁) f)
+                        ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+                    ≈⟨ sym ilaw-associative ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                        ∘ (Functor.map (compose-functors g₂ f₁) f
+                          ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                    ≈⟨ refl ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                        ∘ (Functor.map g₂ (Functor.map f₁ f)
+                          ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                    ≈⟨ refl ⟩∘⟨ sym (Functor.law-composes g₂) ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                        ∘ Functor.map g₂ (Category._∘_ B (Functor.map f₁ f) (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                    ≈⟨ refl ⟩∘⟨ Functor.law-preserves-equality g₂ (NaturalTransformation.naturality-condition (NaturalIsomorphism.g f≈f)) ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                        ∘ Functor.map g₂ (Category._∘_ B (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)) (Functor.map f₂ f))
+                    ≈⟨ refl ⟩∘⟨ Functor.law-composes g₂ ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                        ∘ (Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+                          ∘ Functor.map g₂ (Functor.map f₂ f))
+                    ≈⟨ refl ⟩
+                      NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                        ∘ (Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+                          ∘ Functor.map (compose-functors g₂ f₂) f)
+                    ≈⟨ ilaw-associative ⟩
+                      (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                          ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                        ∘ Functor.map (compose-functors g₂ f₂) f
+                    ∎
+                }
+          ; isomorphicˡ =
+              let open Relation.Binary.Reasoning.Setoid setoid in
+              begin
+                (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                    ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                  ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+              ≈⟨ refl ⟩∘⟨ sym (NaturalTransformation.naturality-condition (NaturalIsomorphism.f g≈g)) ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                    ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                  ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+              ≈⟨ ilaw-associative ⟩
+                ((NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                      ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                    ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+              ≈⟨ sym ilaw-associative ⟩∘⟨ refl ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                    ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+                    ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+              ≈⟨ (refl ⟩∘⟨ sym (Functor.law-composes g₂)) ⟩∘⟨ refl ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                    ∘ Functor.map g₂ (Category._∘_ B
+                        (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+                        (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+              ≈⟨ (refl ⟩∘⟨ Functor.law-preserves-equality g₂ (NaturalIsomorphism.isomorphicˡ f≈f)) ⟩∘⟨ refl ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                    ∘ Functor.map g₂ (Category.id B))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+              ≈⟨ (refl ⟩∘⟨ Functor.law-map-id g₂) ⟩∘⟨ refl ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g) ∘ id)
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+              ≈⟨ ilaw-identityʳ ⟩∘⟨ refl ⟩
+                NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+              ≈⟨ NaturalIsomorphism.isomorphicˡ g≈g ⟩
+                id
+              ∎
+          ; isomorphicʳ =
+              let open Relation.Binary.Reasoning.Setoid setoid in
+              begin
+                (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                    ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+                  ∘ Functor.map g₂ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+              ≈⟨ refl ⟩∘⟨ sym (NaturalTransformation.naturality-condition (NaturalIsomorphism.g g≈g)) ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                    ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                  ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+              ≈⟨ ilaw-associative ⟩
+                ((NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                      ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f)))
+                    ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+              ≈⟨ sym ilaw-associative ⟩∘⟨ refl ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                    ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+                    ∘ Functor.map g₁ (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f)))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+              ≈⟨ (refl ⟩∘⟨ sym (Functor.law-composes g₁)) ⟩∘⟨ refl ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                    ∘ Functor.map g₁ (Category._∘_ B
+                        (NaturalTransformation.transform-object (NaturalIsomorphism.f f≈f))
+                        (NaturalTransformation.transform-object (NaturalIsomorphism.g f≈f))))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+              ≈⟨ (refl ⟩∘⟨ Functor.law-preserves-equality g₁ (NaturalIsomorphism.isomorphicʳ f≈f)) ⟩∘⟨ refl ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                    ∘ Functor.map g₁ (Category.id B))
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+              ≈⟨ (refl ⟩∘⟨ Functor.law-map-id g₁) ⟩∘⟨ refl ⟩
+                (NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g) ∘ id)
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+              ≈⟨ ilaw-identityʳ ⟩∘⟨ refl ⟩
+                NaturalTransformation.transform-object (NaturalIsomorphism.f g≈g)
+                  ∘ NaturalTransformation.transform-object (NaturalIsomorphism.g g≈g)
+              ≈⟨ NaturalIsomorphism.isomorphicʳ g≈g ⟩
+                id
+              ∎
+          }
     }
